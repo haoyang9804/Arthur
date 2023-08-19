@@ -19,5 +19,5 @@ struct Node {
    * @return std::string 
    */
   virtual std::string accept(Visitor* v) = 0;
-  virtual std::string str() = 0;
+  virtual std::string toString() = 0;
 };
