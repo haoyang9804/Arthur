@@ -4,9 +4,6 @@
 
 struct Visitor;
 
-#define REGISTER_NODE_VIRTUAL_FUNC \
-  virtual std::string accept(Visitor* v) = 0; \
-  virtual std::string str() = 0;
 
 struct Node {
   /**

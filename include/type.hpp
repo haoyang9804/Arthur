@@ -24,7 +24,6 @@ public:
   }
   virtual std::string toString() = 0;
   virtual std::string accept(Visitor* v) = 0;  
-  REGISTER_NODE_VIRTUAL_FUNC;
 };
 
 class IntegerType : public Type {
@@ -41,7 +40,7 @@ private:
       isUnsigned(_isUnsigned)
     {}
 
-    bool operator== (const infoBitField&& b) {
+    bool operator== (const infoBitField&& b) const {
       return isUnsigned == b.isUnsigned;
     }
   };
@@ -49,6 +48,7 @@ private:
 public:
   IntegerType() {
     _type_index = 1;
+    bit.isUnsigned = 0;
   }
   IntegerType(unsigned isUnsigned) {
     _type_index = 1;
@@ -111,7 +111,7 @@ class AddressType : public Type {
 private:
   struct infoBitField {
     unsigned isPayable : 1;
-    bool operator== (const infoBitField&& b) {
+    bool operator== (const infoBitField&& b) const {
       return this->isPayable == b.isPayable;
     }
   };

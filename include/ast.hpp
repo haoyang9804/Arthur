@@ -5,15 +5,15 @@
 
 class OperatorLiteral;
 
-class BoolLiteral {
-public:
-  type type_() { return type.BOOL; }
+// class BoolLiteral {
+// public:
+//   type type_() { return type.BOOL; }
   
-};
+// };
 
-class IntegerLiteral {
+// class IntegerLiteral {
 
-};
+// };
 
 
 
