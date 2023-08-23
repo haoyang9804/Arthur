@@ -6,19 +6,17 @@
 #include <unordered_map>
 #include <assert.h>
 
-typedef uint16_t TYPEINDEX;
-typedef std::string TYPENAME;
-
-extern std::unordered_map<TYPEINDEX, TYPENAME> TypeContext;
+extern std::unordered_map<uint16_t, std::string> TypeContext;
+extern uint16_t user_defined_type_index;
 
 class Type : public Node {
 protected:
-  TYPEINDEX _type_index;
+  uint16_t _type_index;
 public:
   Type() {}
-  Type(TYPEINDEX _type_index) : _type_index(_type_index) {}
-  const TYPEINDEX type_index() { return _type_index; }
-  TYPENAME type_name() { return TypeContext[_type_index]; }
+  Type(uint16_t _type_index) : _type_index(_type_index) {}
+  const uint16_t type_index() { return _type_index; }
+  std::string type_name() { return TypeContext[_type_index]; }
   virtual bool isSameAs(Type* t) {
     return this->_type_index == t->type_index();
   }
@@ -148,14 +146,12 @@ public:
 
 class BytesType : public Type {
 private:
-  uint8_t _suffix;
+  uint16_t _suffix;
 public:
-  uint8_t suffix() { return _suffix; }
+  uint16_t suffix() { return _suffix; }
   BytesType() = delete; // you must specify the suffix
-  BytesType(uint8_t suffix_) {
-    if (not (suffix_ <= 32 && suffix_ >= 1)) {
-      throw std::logic_error("suffix " + std::to_string(suffix_) + " of bytes is out-of-range");
-    }
+  BytesType(uint16_t suffix_) {
+    ASSERT_LOGIC(suffix_ <= 32 && suffix_ >= 1, "suffix " + std::to_string(suffix_) + " of bytes is out-of-range");
     _suffix = suffix_; 
     _type_index = 4; 
   }
@@ -176,5 +172,46 @@ public:
 
 class StringType : public Type {
 public:
-  
+  StringType() {
+    _type_index = 5;
+  }
+  bool isSameAs(Type* t) final {
+    return this->_type_index == t->type_index();
+  }
+  std::string toString() final {
+    return "string";
+  }
+  std::string accept(Visitor* v) final {
+    return v->visit(this);
+  }  
 };
+
+class UserType : public Type {
+protected:
+  std::string _name;
+public: 
+  UserType() { _type_index = user_defined_type_index++; }
+  std::string name() { return _name; }
+};
+
+class EnumType : public UserType {
+public:
+  EnumType () = delete; // you must specify the name;
+  EnumType (std::string name_) {
+    ASSERT_LOGIC(name_.size() > 0, "EnumType should have a non-empty name");
+    _name = name_;
+  }
+  bool isSameAs(Type* t) final {
+    if (this->_type_index != t->type_index())
+      return false;
+    EnumType* enumt = dynamic_cast<EnumType*>(t);
+    return enumt->name() == this->_name;
+  }
+  std::string toString() final {
+    return _name;
+  }
+  std::string accept(Visitor* v) final {
+    return v->visit(this);
+  }
+};
+

@@ -2,6 +2,21 @@ cmake_minimum_required(VERSION 3.13.4)
 project(Arthur)
 
 file(
+  COPY
+  ${CMAKE_SOURCE_DIR}/words
+  DESTINATION
+  ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+# this is for google test
+file(
+  COPY
+  ${CMAKE_SOURCE_DIR}/words
+  DESTINATION
+  ${CMAKE_CURRENT_BINARY_DIR}/tests
+)
+
+file(
   GLOB_RECURSE SRCS
   src/*.cpp
 )
