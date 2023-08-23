@@ -46,10 +46,7 @@ private:
   };
   infoBitField bit{1};
 public:
-  IntegerType() {
-    _type_index = 1;
-    bit.isUnsigned = 0;
-  }
+  IntegerType() = delete; // you must specify the attributes, such as isUnsigned
   IntegerType(unsigned isUnsigned) {
     _type_index = 1;
     bit.isUnsigned = isUnsigned;
@@ -118,10 +115,9 @@ private:
   infoBitField bit{0};
 
 public:
-  AddressType() {
-    _type_index = 3;
-  }
+  AddressType() = delete; // you must specify the `isPayable` attribute
   AddressType(unsigned isPayable) {
+    _type_index = 3;
     bit.isPayable = isPayable;
   }
 
@@ -141,7 +137,7 @@ public:
     return v->visit(this);
   }
 
-  bool isSameAs(Type* t) {
+  bool isSameAs(Type* t) final {
     if (this->_type_index != t->type_index())
       return false;
     AddressType* addresst = dynamic_cast<AddressType*>(t);
@@ -150,3 +146,35 @@ public:
   }
 };
 
+class BytesType : public Type {
+private:
+  uint8_t _suffix;
+public:
+  uint8_t suffix() { return _suffix; }
+  BytesType() = delete; // you must specify the suffix
+  BytesType(uint8_t suffix_) {
+    if (not (suffix_ <= 32 && suffix_ >= 1)) {
+      throw std::logic_error("suffix " + std::to_string(suffix_) + " of bytes is out-of-range");
+    }
+    _suffix = suffix_; 
+    _type_index = 4; 
+  }
+  bool isSameAs(Type* t) final {
+    if (this->_type_index != t->type_index())
+      return false;
+    BytesType* bytest = dynamic_cast<BytesType*>(t);
+    assert(bytest != nullptr);
+    return this->suffix() == bytest->suffix();
+  }
+  std::string toString() final {
+    return "bytes" + std::to_string(_suffix);
+  }
+  std::string accept(Visitor* v) final {
+    return v->visit(this);
+  } 
+};
+
+class StringType : public Type {
+public:
+  
+};

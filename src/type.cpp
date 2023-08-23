@@ -3,5 +3,6 @@
 std::unordered_map<TYPEINDEX, TYPENAME> TypeContext = {
   {1, "Integer"},
   {2, "Bool"},
-  {3, "Address"}
+  {3, "Address"},
+  {4, "Bytes"}
 };
