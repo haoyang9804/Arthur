@@ -21,10 +21,17 @@ public:
     return this->_type_index == t->type_index();
   }
   virtual std::string toString() = 0;
-  virtual std::string accept(Visitor* v) = 0;  
+  virtual std::string accept(Visitor* v) = 0;
+  virtual bool isValueType() { return false; }
+  virtual bool isReferenceType() { return false; }
 };
 
-class IntegerType : public Type {
+class ValueType : public Type {
+public:
+  bool isValueType() final { return true; }
+};
+
+class IntegerType : public ValueType {
 private:
   struct infoBitField {
     unsigned isUnsigned : 1;
@@ -82,7 +89,7 @@ public:
   
 };
 
-class BooleanType : public Type {
+class BooleanType : public ValueType {
 public:
   BooleanType() {
     _type_index = 2;
@@ -100,9 +107,9 @@ public:
 
 // Fixed Point Numbers are under development.
 // We temporarily leave it void here.
-class FloatType;
+class FloatType; // also a ValueType
 
-class AddressType : public Type {
+class AddressType : public ValueType {
 private:
   struct infoBitField {
     unsigned isPayable : 1;
@@ -144,7 +151,7 @@ public:
   }
 };
 
-class BytesType : public Type {
+class BytesType : public ValueType {
 private:
   uint16_t _suffix;
 public:
@@ -170,7 +177,7 @@ public:
   } 
 };
 
-class StringType : public Type {
+class StringType : public ValueType {
 public:
   StringType() {
     _type_index = 5;
@@ -186,7 +193,70 @@ public:
   }  
 };
 
-class UserType : public Type {
+class FunctionType : public ValueType {
+private:
+  struct infoBitField {
+    // scope = 0 -> internal
+    // scope = 1 -> external
+    unsigned scope : 1;
+    // attr = 0 -> pure
+    // attr = 1 -> view
+    // attr = 2 -> payable
+    unsigned attr : 2;
+
+    bool operator== (const infoBitField&& b) const {
+      ASSERT_LOGIC(b.attr <= 2 && attr <= 2, "Invalid attr value here, b.attr = " \
+       + std::to_string(b.attr) + " and attr = " + std::to_string(attr));
+      return scope == b.scope && attr == b.attr;
+    }
+
+    bool operator!= (const infoBitField&& b) const {
+      return !(scope == b.scope && attr == b.attr);
+    }
+  };
+  
+  infoBitField b{0, 0};
+
+  std::vector<Type*> _retType;
+  std::vector<Type*> _paramType;
+
+public:
+  FunctionType() = delete;
+  FunctionType(unsigned scope, unsigned attr, std::vector<Type*> const&& retType_, std::vector<Type*> const&& paramTypes_) {
+    ASSERT_LOGIC(attr <= 2, "Invalid attr value here, attr = " + std::to_string(attr));
+    b.scope = scope;
+    b.attr = attr;
+    _retType = retType_;
+    _paramType = paramTypes_;
+    _type_index = 6;
+  }
+  
+  infoBitField info() { return b; }
+  
+  std::vector<Type*> retType() { return _retType; }
+
+  std::vector<Type*> paramType() { return _paramType; }
+
+  bool isSameAs(Type* t) final {
+    if (this->_type_index != t->type_index())
+      return false;
+    FunctionType* ftype = dynamic_cast<FunctionType*>(t);
+    assert(ftype != nullptr);
+    if (b != ftype->info())
+      return false;
+    i
+  }
+  std::string toString() final {
+    std::string ret = "";
+
+  }
+  std::string accept(Visitor* v) final {
+    return v->visit(this);
+  }  
+
+};
+
+class UserType : public ValueType {
 protected:
   std::string _name;
 public: 
@@ -215,3 +285,28 @@ public:
   }
 };
 
+class TypeAliasType : public UserType {
+private:
+  uint16_t _alias_type_index;
+public:
+  uint16_t alias_type_index() { return _alias_type_index; }
+  TypeAliasType() = delete;
+  TypeAliasType(uint16_t alias_type_index_, std::string name_) {
+    // TODO: rewrite this ASSERT
+    ASSERT_LOGIC(alias_type_index_ >= 257 && alias_type_index_ < \
+      user_defined_type_index || alias_type_index_ <= 6,\
+        "alias_type_index_ is " + std::to_string(alias_type_index_) + ", which is out-of-scope: "\
+          + std::to_string(6));
+    _alias_type_index = alias_type_index_;
+    _name = name_;
+  }
+  bool isSameAs(Type* t) final {
+    return this->_type_index == t->type_index();
+  }
+  std::string toString() final {
+    return _name;
+  }
+  std::string accept(Visitor* v) final {
+    return v->visit(this); 
+  }
+};
