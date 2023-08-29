@@ -8,7 +8,5 @@ struct Visitor {
 };
 
 struct PrintVisitor : Visitor {
-  std::string visit(Node* t) {
-    return t->toString();
-  }
+  std::string visit(Node* t) { return t->toString(); }
 };

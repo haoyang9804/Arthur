@@ -1,23 +1,24 @@
 #include "../include/utils.hpp"
-#include "../include/config.hpp"
 
 #include <fstream>
+#include <iostream>
 #include <random>
 #include <sstream>
-#include <iostream>
+
+#include "../include/config.hpp"
 
 std::vector<std::string> words = {};
 
 std::string read(std::string path, int n = -1) {
   std::cout << std::filesystem::current_path() << std::endl;
-  ASSERT_RUNTIME(std::filesystem::exists(path), "Path " + path + " does not exists");
+  ASSERT_RUNTIME(std::filesystem::exists(path),
+                 "Path " + path + " does not exists");
   std::ifstream infile(path);
   std::stringstream buffer;
-  
+
   if (n == -1) {
     buffer << infile.rdbuf();
-  }
-  else {
+  } else {
     std::string line;
     int line_count = 0;
     while (std::getline(infile, line) && line_count++ < n) {

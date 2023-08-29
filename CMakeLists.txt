@@ -21,15 +21,31 @@ file(
   src/*.cpp
 )
 
-find_program(CLANG_FORMAT_EXE NAMES "clang-format" REQUIRED)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
+
 add_library(${PROJECT_NAME}_lib SHARED ${SRCS})
 target_include_directories(${PROJECT_NAME}_lib
     PUBLIC
         ${PROJECT_SOURCE_DIR}/include
 )
+
+find_program(CLANG_FORMAT_EXE NAMES "clang-format" REQUIRED)
+set(CLANG_FORMAT_COMMAND "${CLANG_FORMAT_EXE}")
+message(STATUS "CLANG_FORMAT_COMMAND is ${CLANG_FORMAT_COMMAND}")
+file(GLOB_RECURSE ALL_CXX_SOURCE_FILES
+  ${PROJECT_SOURCE_DIR}/*.[ch]pp
+)
+message(STATUS "ALL_CXX_SOURCE_FILES ready for clang-format is ${ALL_CXX_SOURCE_FILES}")
+add_custom_target(
+    format
+    COMMAND ${CLANG_FORMAT_COMMAND}
+    -i
+    -style=Google
+    ${ALL_CXX_SOURCE_FILES}
+)
+
 include(FetchContent)
 FetchContent_Declare(
   googletest

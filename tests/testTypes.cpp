@@ -1,16 +1,14 @@
 #include <gtest/gtest.h>
 
+#include <iostream>
+
+#include "../include/config.hpp"
 #include "../include/type.hpp"
 #include "../include/visitor.hpp"
-#include "../include/config.hpp"
-
-#include <iostream>
 
 Visitor* v = new PrintVisitor();
 
-
 TEST(testTypes, testIntegerType) {
-  
   Type* t1 = new IntegerType(0);
   ASSERT_EQ(t1->accept(v), "int");
   ASSERT_STREQ(t1->type_name().c_str(), "Integer");
@@ -31,7 +29,7 @@ TEST(testTypes, testIntegerType) {
   ASSERT_FALSE(t2->isSameAs(t1));
 }
 
-TEST(testTypes, testBooleanType){
+TEST(testTypes, testBooleanType) {
   Type* t1 = new BooleanType();
   ASSERT_EQ(t1->accept(v), "bool");
   ASSERT_STREQ(t1->type_name().c_str(), "Bool");
@@ -41,22 +39,21 @@ TEST(testTypes, testBooleanType){
   ASSERT_TRUE(t2->isSameAs(t1));
 }
 
-TEST(testTypes, testAddressType){
-  
+TEST(testTypes, testAddressType) {
   Type* t1 = new AddressType(0);
   ASSERT_EQ(t1->accept(v), "address");
   ASSERT_STREQ(t1->type_name().c_str(), "Address");
   ASSERT_TRUE(t1->isValueType());
-  
+
   Type* t2 = new AddressType(1);
   ASSERT_EQ(t2->accept(v), "address payable");
   ASSERT_STREQ(t2->type_name().c_str(), "Address");
   ASSERT_TRUE(t2->isValueType());
 
-  Type* t1_ = new AddressType(0), * t2_ = new AddressType(1);
+  Type *t1_ = new AddressType(0), *t2_ = new AddressType(1);
   ASSERT_TRUE(t1_->isSameAs(t1) && t1->isSameAs(t1_));
   ASSERT_TRUE(t2_->isSameAs(t2) && t2->isSameAs(t2_));
-  ASSERT_FALSE(t1->isSameAs(t2) || t2->isSameAs(t1));  
+  ASSERT_FALSE(t1->isSameAs(t2) || t2->isSameAs(t1));
 }
 
 TEST(testTypes, testBytesType) {
@@ -64,7 +61,7 @@ TEST(testTypes, testBytesType) {
   ASSERT_EQ(t1->accept(v), "bytes1");
   ASSERT_STREQ(t1->type_name().c_str(), "Bytes");
   ASSERT_TRUE(t1->isValueType());
-  ASSERT_THROW(new BytesType(33), std::logic_error); 
+  ASSERT_THROW(new BytesType(33), std::logic_error);
   Type* t2 = new BytesType(2);
   ASSERT_FALSE(t1->isSameAs(t2) || t2->isSameAs(t1));
 }
@@ -78,12 +75,22 @@ TEST(testTypes, testStringType) {
   ASSERT_TRUE(t1->isSameAs(t2) && t2->isSameAs(t1));
 }
 
-// TEST(testTypes, testFunctionType) {
-//   Type* t1 = new FunctionType(0, 1)
-// }
+TEST(testTypes, testFunctionType) {
+  FunctionType* t1 = new FunctionType(0, 0);
+  ASSERT_FALSE(t1->isPayable());
+  ASSERT_FALSE(t1->isPure());
+  ASSERT_FALSE(t1->isView());
+  FunctionType* t2 = new FunctionType(0, 7);
+  ASSERT_TRUE(t2->isPayable());
+  ASSERT_TRUE(t2->isPure());
+  ASSERT_TRUE(t2->isView());
+  FunctionType* t3 = new FunctionType(0, 5);
+  ASSERT_TRUE(t3->isPayable());
+  ASSERT_TRUE(t3->isPure());
+  ASSERT_FALSE(t3->isView());
+}
 
 TEST(testTypes, testValueType_2) {
-
   Type* t1 = new EnumType(randomlyPickAWord());
   std::cout << t1->type_index() << std::endl;
   ASSERT_EQ(t1->type_index(), 257);

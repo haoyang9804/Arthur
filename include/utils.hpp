@@ -1,13 +1,14 @@
 #pragma once
 
-#include <type_traits>
 #include <string>
+#include <type_traits>
 
-template<class, class = void>
+template <class, class = void>
 struct has_toString_member : std::false_type {};
- 
-template<class T>
-struct has_toString_member<T, std::void_t<decltype(&T::toString)>> : std::true_type {};
+
+template <class T>
+struct has_toString_member<T, std::void_t<decltype(&T::toString)>>
+    : std::true_type {};
 
 #define ASSERT_LOGIC(STATEMENT, STR) \
   if (!(STATEMENT)) throw std::logic_error(STR)
