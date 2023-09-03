@@ -3,6 +3,8 @@
 #include <assert.h>
 
 #include <unordered_map>
+#include <vector>
+#include <string>
 
 #include "node.hpp"
 #include "visitor.hpp"
@@ -177,7 +179,6 @@ class FunctionType : public ValueType {
     // first bit  = 1 -> public
     // second bit = 1 -> internal
     // third bit  = 2 -> external
-    unsigned attr : 3;
     unsigned scope : 2;
     // 000 - three bits
     // first bit  = 1 -> pure
@@ -282,7 +283,6 @@ class FunctionType : public ValueType {
     if (isPublic()) ret += "public";
     else if (isExternal()) ret += "external";
     if (isPayable()) ret += "payable";
-    e
     size_t ret_size = _retType.size();
     // if (! ret_size)
     return ret;

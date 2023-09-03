@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13.4)
+cmake_minimum_required(VERSION 3.24)
 project(Arthur)
 
 option(ERROR "Enable generating error-contained programs." ON)
@@ -14,7 +14,7 @@ file(
   ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-# this is for google test
+# This is for Google test
 file(
   COPY
   ${CMAKE_SOURCE_DIR}/words

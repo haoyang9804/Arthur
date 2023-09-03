@@ -2,6 +2,9 @@
 
 #include <string>
 #include <type_traits>
+#include <stdexcept>
+#include <vector>
+#include <filesystem>
 
 template <class, class = void>
 struct has_toString_member : std::false_type {};
