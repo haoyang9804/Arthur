@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.13.4)
 project(Arthur)
 
+option(ERROR "Enable generating error-contained programs." ON)
+
+if(ERROR)
+  add_definitions(-DERROR)
+endif()
+
 file(
   COPY
   ${CMAKE_SOURCE_DIR}/words
@@ -20,7 +26,6 @@ file(
   GLOB_RECURSE SRCS
   src/*.cpp
 )
-
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)

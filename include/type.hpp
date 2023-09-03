@@ -173,9 +173,11 @@ class StringType : public ValueType {
 class FunctionType : public ValueType {
  private:
   struct infoBitField {
-    // scope = 0 -> internal
-    // scope = 1 -> external
-    // scope = 2 -> public
+    // 000 - three bits
+    // first bit  = 1 -> public
+    // second bit = 1 -> internal
+    // third bit  = 2 -> external
+    unsigned attr : 3;
     unsigned scope : 2;
     // 000 - three bits
     // first bit  = 1 -> pure
@@ -189,7 +191,7 @@ class FunctionType : public ValueType {
           "Invalid attr value here, b.attr = " + std::to_string(b.attr) +
               " and attr = " + std::to_string(attr));
       ASSERT_LOGIC(
-          b.scope <= 2 && attr <= 2,
+          b.scope <= 7 && scope <= 7,
           "Invalid scope value here, b.scope = " + std::to_string(b.scope) +
               " and scope = " + std::to_string(scope));
       return scope == b.scope && attr == b.attr;
@@ -212,8 +214,11 @@ class FunctionType : public ValueType {
                std::vector<Type*> const&& paramTypes_ = {}) {
     ASSERT_LOGIC(attr <= 7,
                  "Invalid attr value here, attr = " + std::to_string(attr));
-    ASSERT_LOGIC(scope <= 2,
+    ASSERT_LOGIC(scope <= 7,
                  "Invalid scope value here, scope = " + std::to_string(scope));
+    #ifndef ERROR
+    assert(typeCheck());
+    #endif
     b.scope = scope;
     b.attr = attr;
     _retType = retType_;
@@ -233,11 +238,17 @@ class FunctionType : public ValueType {
 
   bool isPayable() { return b.attr & 0x04; }
 
-  bool isInternal() { return b.scope == 0; }
+  bool isInternal() { return b.scope & 0x02; }
 
-  bool isExternal() { return b.scope == 1; }
+  bool isExternal() { return b.scope & 0x04; }
 
-  bool isPublic() { return b.scope == 2; }
+  bool isPublic() { return b.scope & 0x01; }
+
+  #ifndef ERROR
+  bool typeCheck() {
+    return !(b.attr != 0x01 && b.attr != 0x02 && b.attr != 0x04 || b.scope != 0x01 && b.scope != 0x02 && b.scope != 0x04);
+  }
+  #endif
 
   bool isSameAs(Type* t) final {
     if (this->_type_index != t->type_index()) return false;
@@ -266,7 +277,12 @@ class FunctionType : public ValueType {
       ret += _paramType[i]->toString();
       if (i != param_size - 1) ret += ", ";
     }
-    ret += ")";
+    ret += ") ";
+    if (isInternal()) ret += "internal";
+    if (isPublic()) ret += "public";
+    else if (isExternal()) ret += "external";
+    if (isPayable()) ret += "payable";
+    e
     size_t ret_size = _retType.size();
     // if (! ret_size)
     return ret;
